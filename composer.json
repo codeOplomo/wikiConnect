@@ -1,9 +1,9 @@
 {
     "autoload": {
         "psr-4": {
-            "MyApp\\": "app/",
-            "Config\\":"config",
-            "Routes\\":"routes"
+            "MyApp\\": "App/",
+            "Config\\":"config/",
+            "Routes\\":"routes/"
         }
     },
     "require": {

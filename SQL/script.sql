@@ -39,17 +39,31 @@ CREATE TABLE `wikitags` (
   FOREIGN KEY (`tagId`) REFERENCES `tags`(`id`)
 );
 
-INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Science'),
-(2, 'Nature'),
-(3, 'Technologie'),
-(4, 'Histoire');
+INSERT INTO `categories` (`name`) VALUES
+('Art'),
+('Culture'),
+('Sports'),
+('Education'),
+('Health'),
+('Politics'),
+('Economics'),
+('Entertainment'),
+('Travel'),
+('Lifestyle');
+
 
 INSERT INTO `tags` (`name`) VALUES
-('Programming'),
-('Biology'),
-('Environment'),
-('Medieval');
+('Painting'),
+('Literature'),
+('Football'),
+('Learning'),
+('Nutrition'),
+('Elections'),
+('Finance'),
+('Movies'),
+('Adventure'),
+('Fashion');
+
 
 INSERT INTO `users` (`name`, `phone`, `email`, `password`, `role`) VALUES
 ('John Doe', '1234567890', 'john.doe@example.com', 'password123', 1),
