@@ -1,8 +1,11 @@
 let selectedCategoryId = null;
 let isUserOnlyView = false;
+let userId = null; 
+let selectedTag = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    const userId = document.getElementById('userId').getAttribute('data-userid');
+    userId = document.getElementById('userId').getAttribute('data-userid');
+
     let allWikis = [];
 
     var tagCheckboxes = document.querySelectorAll('.tag-checkbox');
@@ -15,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 document.getElementById('uncheckedWikiTags').appendChild(checkboxDiv);
             }
+            filterWikis(); // Apply filters when tags change
         });
     });
 
@@ -22,19 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showMyWikisButton.addEventListener('click', function () {
         isUserOnlyView = !isUserOnlyView;
-
-        if (isUserOnlyView) {
-            showMyWikisButton.textContent = 'View all wikis';
-            loadContent(selectedCategoryId, userId);
-        } else {
-            showMyWikisButton.textContent = 'View my wikis';
-            loadContent(selectedCategoryId);
-        }
-
-        toggleWikisView(isUserOnlyView, userId);
+        filterWikis(); // Apply filters when the "View my wikis" button is clicked
     });
 
-    function loadContent(categoryId = null, userId = null) {
+    function loadContent(categoryId = null, additionalUserId = null) {
         let url;
         if (categoryId !== null) {
             url = `../../Api/fetchWikisByCategory.php?categoryId=${categoryId}`;
@@ -42,9 +37,11 @@ document.addEventListener('DOMContentLoaded', function () {
             url = '../../Api/fetchAllWikis.php';
         }
 
-        if (userId !== null) {
-            url += `&userId=${userId}`;
+        if (additionalUserId !== null) {
+            url += `&userId=${additionalUserId}`;
         }
+
+        console.log('Fetching from URL:', url);
 
         fetch(url)
             .then(response => {
@@ -54,11 +51,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(data => {
+                console.log('Received Data:', data);
                 allWikis = data;
-                displayWikis(allWikis);
+                filterWikis(); // Apply filters after loading the content
             })
             .catch(error => console.error('Error:', error));
     }
+
+    // Initially load all wikis
+    loadContent();
 
     function createWikiCard(wiki) {
         const wikiCard = document.createElement('div');
@@ -93,6 +94,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return wikiCard;
     }
 
+    const tagLinks = document.querySelectorAll('.tag-text');
+
+    tagLinks.forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            selectedTag = link.textContent; 
+            filterWikis();
+        });
+    });
+
     const categoryLinks = document.querySelectorAll('.category-link');
 
     categoryLinks.forEach(function (link) {
@@ -100,11 +111,9 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             selectedCategoryId = link.getAttribute('data-category-id');
 
-            if (isUserOnlyView) {
-                loadContent(selectedCategoryId, userId);
-            } else {
-                loadContent(selectedCategoryId);
-            }
+            console.log('Selected Category ID:', selectedCategoryId);
+
+            filterWikis(); // Apply filters when a category is selected
         });
     });
 
@@ -136,14 +145,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function toggleWikisView(isUserOnlyView, userId) {
-        if (isUserOnlyView) {
-            const userWikis = allWikis.filter(wiki => wiki.userId === parseInt(userId));
-            displayWikis(userWikis);
-        } else {
-            displayWikis(allWikis);
+    function filterWikis() {
+        let filteredWikis = allWikis;
+    
+        if (selectedCategoryId !== null) {
+            filteredWikis = filteredWikis.filter(wiki => wiki.categoryId === parseInt(selectedCategoryId));
         }
+    
+        if (isUserOnlyView) {
+            filteredWikis = filteredWikis.filter(wiki => wiki.userId === parseInt(userId));
+        }
+    
+        if (selectedTag !== null) {
+            // Split the tagsList into an array
+            const selectedTagArray = selectedTag.split(', ');
+    
+            // Filter wikis that contain the selected tag
+            filteredWikis = filteredWikis.filter(wiki => {
+                const wikiTags = wiki.tagsList.split(', ');
+                return wikiTags.some(tag => selectedTagArray.includes(tag));
+            });
+        }
+    
+        displayWikis(filteredWikis);
     }
+    
+
 
     window.addEventListener('load', function () {
         loadContent();

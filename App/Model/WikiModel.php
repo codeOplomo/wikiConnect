@@ -204,6 +204,26 @@ public function getWikisByCategory($categoryId) {
     return $filteredArticles;
 }
 
+public function getWikisByTag($tag) {
+    $sql = "SELECT w.*, GROUP_CONCAT(t.name) AS tags
+            FROM wikis w
+            LEFT JOIN wikitags wt ON w.id = wt.wikiId
+            LEFT JOIN tags t ON wt.tagId = t.id
+            WHERE w.deletedAt IS NULL AND t.name = :tag
+            GROUP BY w.id";
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindParam(':tag', $tag, PDO::PARAM_STR);
+    $stmt->execute();
+    
+    if ($stmt) {
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        return false;
+    }
+}
+
+
 
 public function getAllWikisDash() {
     $query = "

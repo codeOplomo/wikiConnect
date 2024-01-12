@@ -39,4 +39,27 @@ class UserModel
         $stmt->execute([$email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+
+public function getUserRole($userId)
+{
+    $stmt = $this->db->prepare("SELECT role FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        return $result['role'];
+    } else {
+        return 0;
+    }
+}
+
+public function getUserDetailsById($userId)
+{
+    $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
 }

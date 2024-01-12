@@ -2,10 +2,23 @@
 require_once '../../vendor/autoload.php';
 use MyApp\Model\WikiModel;
 use MyApp\Model\TagModel;
+use MyApp\Model\UserModel;
 
 session_start();
 if (!isset($_SESSION['userId'])) {
     header('Location: ../auth/login.php');
+    exit();
+}
+
+$userModel = new UserModel(); 
+
+$requiredRoleId = 2;
+
+$userRole = $userModel->getUserRole($_SESSION['userId']); 
+
+if ($userRole !== $requiredRoleId) {
+    header('Location: ../auth/login.php');
+    session_destroy();
     exit();
 }
 

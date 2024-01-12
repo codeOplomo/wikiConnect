@@ -3,6 +3,33 @@ require_once '../../vendor/autoload.php';
 use MyApp\Model\WikiModel;
 use MyApp\Model\CategoryModel;
 use MyApp\Model\TagModel;
+use MyApp\Model\UserModel;
+
+session_start();
+
+if (!isset($_SESSION['userId'])) {
+    header('Location: ../auth/login.php');
+    exit();
+}
+
+$userModel = new UserModel();
+
+$requiredRoleId = 1;
+
+$userRole = $userModel->getUserRole($_SESSION['userId']);
+
+if ($userRole !== $requiredRoleId) {
+    header('Location: ../auth/login.php');
+    session_destroy();
+    exit();
+}
+$userDetails = $userModel->getUserDetailsById($_SESSION['userId']);
+
+if ($userDetails) {
+    $userName = isset($userDetails['name']) ? htmlspecialchars($userDetails['name']) : 'test';
+} else {
+    $userName = 'test';
+}
 
 $wikiModel = new WikiModel();
 $categoryModel = new CategoryModel();
@@ -157,7 +184,9 @@ $tags = $tagModel->getAllTags();
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                         <img class="rounded-circle me-lg-2" src="img/user.png" alt=""
                             style="width: 40px; height: 40px;">
-                        <span class="d-none d-lg-inline-flex">User-name</span>
+                        <span class="d-none d-lg-inline-flex">
+                            <?= htmlspecialchars($userName) ?>
+                        </span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                         <a href="#" class="dropdown-item">My Profile</a>
@@ -265,6 +294,7 @@ $tags = $tagModel->getAllTags();
                                 <th scope="col">Wiki Title</th>
                                 <th scope="col">Content</th>
                                 <th scope="col">Category</th>
+                                <th scope="col">Tags</th>
                                 <th scope="col">Author</th>
                                 <th scope="col">Archive</th>
                                 <th></th>
@@ -291,12 +321,11 @@ $tags = $tagModel->getAllTags();
                                         <td>
                                             <?php echo $wikiModel->getCategoryName($wiki['categoryId']) ?>
                                         </td>
-
-                                        <td class="tag-cell" data-tags="<?= htmlspecialchars($tagList) ?>">
-                                            <?php
-                                            echo htmlspecialchars($tagList);
-                                            ?>
+                                        <td class="tag-cell" data-tag="<?= htmlspecialchars($tagList) ?>">
+                                            <?php echo htmlspecialchars($tagList); ?>
                                         </td>
+
+
                                         <td>
                                             <?php echo $wikiModel->getUserName($wiki['userId']) ?>
                                         </td>
@@ -437,7 +466,7 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                
+
                                                 <form action="../../App/Controllers/Dashmin.php" method="post">
                                                     <input type="hidden" name="action" value="updateCategory">
                                                     <div class="form-group">
@@ -470,7 +499,7 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                
+
                                                 <p>Are you sure you want to delete the category: <strong>
                                                         <?php echo htmlspecialchars($category['name']); ?>
                                                     </strong>?</p>
@@ -633,27 +662,6 @@ $tags = $tagModel->getAllTags();
 
 
 
-
-
-        <div class="float-left col-sm-12 col-md-6 col-xl-6 mt-4">
-            <div class="h-100 bg-light rounded p-4">
-                <!-- Date Pickers -->
-                <div class="mb-4">
-                    <label for="startDate" style="color: white;">Date de début:</label>
-                    <input type="datetime-local" id="startDate" name="startDate" class="form-control">
-                </div>
-                <div class="mb-4">
-                    <label for="endDate" style="color: white;">Date de fin:</label>
-                    <input type="datetime-local" id="endDate" name="endDate" class="form-control">
-                </div>
-
-                <div>
-                    <h6>Produits les plus performants</h6>
-
-                </div>
-            </div>
-        </div>
-
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -668,67 +676,70 @@ $tags = $tagModel->getAllTags();
 
 
         <script>
-            document.getElementById('add-category-button').addEventListener('click', function () {
-                var addCategoryForm = document.getElementById('add-category-form');
-                if (addCategoryForm.style.display === 'none' || addCategoryForm.style.display === '') {
-                    addCategoryForm.style.display = 'block';
-                } else {
+            document.addEventListener('DOMContentLoaded', function () {
+                function toggleCategoryForm() {
+                    var addCategoryForm = document.getElementById('add-category-form');
+                    addCategoryForm.style.display = (addCategoryForm.style.display === 'none' || addCategoryForm.style.display === '') ? 'block' : 'none';
+                }
+
+                function closeCategoryForm() {
+                    var addCategoryForm = document.getElementById('add-category-form');
                     addCategoryForm.style.display = 'none';
                 }
-            });
 
-            document.getElementById('close-category-form').addEventListener('click', function () {
-                var addCategoryForm = document.getElementById('add-category-form');
-                addCategoryForm.style.display = 'none';
-            });
+                function toggleTagForm() {
+                    var addTagForm = document.getElementById('add-tag-form');
+                    addTagForm.style.display = (addTagForm.style.display === 'none' || addTagForm.style.display === '') ? 'block' : 'none';
+                }
 
-            document.getElementById('add-tag-button').addEventListener('click', function () {
-                var addTagForm = document.getElementById('add-tag-form');
-                if (addTagForm.style.display === 'none' || addTagForm.style.display === '') {
-                    addTagForm.style.display = 'block';
-                } else {
+                function closeTagForm() {
+                    var addTagForm = document.getElementById('add-tag-form');
                     addTagForm.style.display = 'none';
                 }
-            });
 
-            document.getElementById('close-tag-form').addEventListener('click', function () {
-                var addTagForm = document.getElementById('add-tag-form');
-                addTagForm.style.display = 'none';
-            });
+                function filterTable() {
+                    var selectedCategory = document.getElementById('categoryFilter').value;
+                    var selectedTag = document.getElementById('tagFilter').value;
+                    var rows = document.querySelectorAll('.table tbody tr');
 
+                    rows.forEach(function (row) {
+                        if (shouldDisplayRow(row, selectedCategory, selectedTag)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                }
 
+                function shouldDisplayRow(row, selectedCategory, selectedTag) {
+                    var categoryCell = row.querySelector('td[data-category-id]');
+                    var categoryId = categoryCell.getAttribute('data-category-id');
 
-            function filterTable() {
-                var selectedCategory = document.getElementById('categoryFilter').value;
-                var selectedTag = document.getElementById('tagFilter').value;
-                var rows = document.querySelectorAll('.table tbody tr');
+                    var tagCell = row.querySelector('.tag-cell');
+                    var tagsList = tagCell.getAttribute('data-tag');
+                    var tags = tagsList.split(', ').map(tag => tag.trim());
 
-                rows.forEach(function (row) {
-                    if (shouldDisplayRow(row, selectedCategory, selectedTag)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
+                    var categoryMatch = selectedCategory === 'all' || selectedCategory === categoryId;
+
+                    if (selectedTag === 'all') {
+                        return categoryMatch;
                     }
-                });
-            }
 
-            function shouldDisplayRow(row, selectedCategory, selectedTag) {
-                var categoryCell = row.querySelector('td[data-category-id]');
-                var categoryId = categoryCell.getAttribute('data-category-id');
+                    if (tags.includes(selectedTag)) {
+                        return categoryMatch;
+                    }
 
-                var tagCell = row.querySelector('.tag-cell');
-                var tags = tagCell.getAttribute('data-tags').split(', '); // Split the tags string into an array
+                    return false;
+                }
 
-                var categoryMatch = selectedCategory === 'all' || selectedCategory === categoryId;
-                var tagMatch = selectedTag === 'all' || tags.includes(selectedTag);
+                document.getElementById('add-category-button').addEventListener('click', toggleCategoryForm);
+                document.getElementById('close-category-form').addEventListener('click', closeCategoryForm);
+                document.getElementById('add-tag-button').addEventListener('click', toggleTagForm);
+                document.getElementById('close-tag-form').addEventListener('click', closeTagForm);
+                document.getElementById('categoryFilter').addEventListener('change', filterTable);
+                document.getElementById('tagFilter').addEventListener('change', filterTable);
 
-                return categoryMatch && tagMatch;
-            }
-
-            // Add event listeners to the category and tag filters
-            document.getElementById('categoryFilter').addEventListener('change', filterTable);
-            document.getElementById('tagFilter').addEventListener('change', filterTable);
-
+            });
 
         </script>
 </body>

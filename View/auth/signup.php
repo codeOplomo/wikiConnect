@@ -1,4 +1,4 @@
-<!-- At the top of your signup form -->
+
 <?php
 // use MyApp\Core\Session;
 ?>
@@ -30,7 +30,9 @@
             <img src="../../Assets/img/wikiHero.png" alt="Hero Image" class="w-full h-auto">
             <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                <h1 class="text-4xl font-bold" style="color: #703BF7; line-height: 10vh; -webkit-text-stroke: 2px white; font-size: 4.5rem;">Discover a place you'll love to live</h1>
+                    <h1 class="text-4xl font-bold"
+                        style="color: #703BF7; line-height: 10vh; -webkit-text-stroke: 2px white; font-size: 4.5rem;">
+                        Discover a place you'll love to live</h1>
                 </div>
             </div>
         </div>
@@ -40,25 +42,27 @@
             <div class="form-inputs-container">
                 <div class="mb-4 text-center">
                     <h2 class="text-2xl font-bold text-white mb-4">Sign Up</h2>
-                    <form action="../../App/Controllers/Register.php" method="post">
+                    <form id="signup-form" action="../../App/Controllers/Register.php" method="post">
 
                         <label for="username">Username</label>
                         <input name="username" id="username" class="p-2 border border-gray-300 rounded" type="text"
                             placeholder="Full Name" />
+                        <div class="error-message text-red-500 mt-2" id="username-error"></div>
 
                         <label for="phone">Phone</label>
                         <input name="phone" id="phone" class="p-2 border border-gray-300 rounded" type="tel"
                             placeholder="Phone Number" />
+                        <div class="error-message text-red-500 mt-2" id="phone-error"></div>
 
                         <label for="email">Email</label>
                         <input name="email" id="email" class="p-2 border border-gray-300 rounded" type="email"
-                            placeholder="Email"/>
+                            placeholder="Email" />
+                        <div class="error-message text-red-500 mt-2" id="email-error"></div>
 
-
-                    <label for=" password">Password</label>
+                        <label for="password">Password</label>
                         <input name="password" id="password" class="p-2 border border-gray-300 rounded" type="password"
                             placeholder="Password" />
-
+                        <div class="error-message text-red-500 mt-2" id="password-error"></div>
 
                         <div class="flex items-center justify-between">
                             <button type="submit"
@@ -76,22 +80,8 @@
 
 
     <?php include '../../View/template/footer.php'; ?>
-    <script src="Assets/js/myscript.js"></script>
-    <script>
-        function setRole(role) {
-            document.getElementById('role').value = role;
-            const buyerButton = document.querySelector('.first-button');
-            const sellerButton = document.querySelector('.second-button');
+    <script src="../../Assets/js/signup.js"></script>
 
-            if (role === 'Buyer') {
-                buyerButton.classList.add('selected-button');
-                sellerButton.classList.remove('selected-button');
-            } else {
-                sellerButton.classList.add('selected-button');
-                buyerButton.classList.remove('selected-button');
-            }
-        }
-    </script>
 
 </body>
 

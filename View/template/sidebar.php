@@ -13,9 +13,9 @@
                         </div>
                     </div>
                     <div class="ms-3">
-                        <h6 class="mb-0">User-name</h6>
-                        <span>Admin</span>
-                    </div>
+                    <h6 class="mb-0"><?php echo htmlspecialchars($userName); ?></h6>
+                    <span>Admin</span>
+                </div>
                 </div>
                 <div class="navbar-nav w-100">
                 <a href="#" class="nav-item nav-link active" id="dashboard-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>

@@ -1,11 +1,24 @@
 <?php
 require_once '../../vendor/autoload.php';
 use MyApp\Model\WikiModel;
+use MyApp\Model\UserModel;
 
 session_start();
 
 if (!isset($_SESSION['userId'])) {
     header('Location: ../auth/login.php');
+    exit();
+}
+
+$userModel = new UserModel(); 
+
+$requiredRoleId = 2;
+
+$userRole = $userModel->getUserRole($_SESSION['userId']); 
+
+if ($userRole !== $requiredRoleId) {
+    header('Location: ../auth/login.php');
+    session_destroy();
     exit();
 }
 
@@ -61,17 +74,48 @@ $wikiModel = new WikiModel();
                 </div>
 
                 <!-- Categories Section -->
-<aside class="categories-section mt-3 white-border">
-    <h2>Categories</h2>
+                <aside class="categories-section mt-3 white-border">
+                    <h2>Categories</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                $categories = $wikiModel->getAllCategories();
+                                $totalCategories = count($categories);
+                                $halfCategories = ceil($totalCategories / 2);
+                                for ($i = 0; $i < $halfCategories; $i++) {
+                                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                for ($i = $halfCategories; $i < $totalCategories; $i++) {
+                                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+
+
+
+
+                <!-- Tags Section -->
+<aside class="tags-section mt-3 white-border">
+    <h2>Tags</h2>
     <div class="row">
         <div class="col-md-6">
             <ul class="list-group">
                 <?php
-                $categories = $wikiModel->getAllCategories();
-                $totalCategories = count($categories);
-                $halfCategories = ceil($totalCategories / 2);
-                for ($i = 0; $i < $halfCategories; $i++) {
-                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                $tags = $wikiModel->getAllTags();
+                $totalTags = count($tags);
+                $halfTags = ceil($totalTags / 2);
+                for ($i = 0; $i < $halfTags; $i++) {
+                    echo '<li class="list-group-item"><span class="tag-text">' . htmlspecialchars($tags[$i]['name']) . '</span></li>';
                 }
                 ?>
             </ul>
@@ -79,8 +123,8 @@ $wikiModel = new WikiModel();
         <div class="col-md-6">
             <ul class="list-group">
                 <?php
-                for ($i = $halfCategories; $i < $totalCategories; $i++) {
-                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                for ($i = $halfTags; $i < $totalTags; $i++) {
+                    echo '<li class="list-group-item"><span class="tag-text">' . htmlspecialchars($tags[$i]['name']) . '</span></li>';
                 }
                 ?>
             </ul>
@@ -89,35 +133,6 @@ $wikiModel = new WikiModel();
 </aside>
 
 
-
-
-                <!-- Tags Section -->
-                <aside class="tags-section mt-3  white-border">
-                    <h2>Tags</h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-group">
-                                <?php
-                                $tags = $wikiModel->getAllTags();
-                                $totalTags = count($tags);
-                                $halfTags = ceil($totalTags / 2);
-                                for ($i = 0; $i < $halfTags; $i++) {
-                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
-                                }
-                                ?>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-group">
-                                <?php
-                                for ($i = $halfTags; $i < $totalTags; $i++) {
-                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
-                                }
-                                ?>
-                            </ul>
-                        </div>
-                    </div>
-                </aside>
 
             </div>
         </div>
