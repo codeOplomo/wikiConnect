@@ -58,7 +58,7 @@ if ($wiki) {
     <div class="container-fluid d-flex flex-column mt-5">
 
         <div class="row">
-            <div class="col-8">
+            <div class="col-12 col-md-8">
                 <h2 style="text-align: center;">Wiki Detail</h2>
                 <div class="main-section p-3">
                     <img src="<?= $imagePath ?>" alt="cover" class="cover img-fluid mx-auto d-block p-3"
@@ -90,7 +90,6 @@ if ($wiki) {
                         </p>
                     </div>
 
-                    <!-- Inside the main-section div -->
                     <div class="modal fade" id="deleteWikiModal" tabindex="-1" role="dialog"
                         aria-labelledby="deleteWikiModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
@@ -122,38 +121,67 @@ if ($wiki) {
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-4  scndSection">
 
-                <div class="button-section">
-                    <button type="button" id="toggleButton" onclick="toggleWikisView()">View my wikis</button>
+                <div class="button-section  mt-3 text-center">
                     <button type="button" class="btn mainBtnColor" data-toggle="modal" data-target="#addWikiModal">Add a
                         wiki</button>
                 </div>
 
                 <!-- Categories Section -->
-                <aside class="categories-section">
+                <aside class="categories-section mt-3 white-border">
                     <h2>Categories</h2>
-                    <ul>
-                        <?php
-                        $categories = $wikiModel->getAllCategories();
-                        foreach ($categories as $category):
-                            echo '<li>' . htmlspecialchars($category['name']) . '</li>';
-                        endforeach;
-                        ?>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                $categories = $wikiModel->getAllCategories();
+                                $totalCategories = count($categories);
+                                $halfCategories = ceil($totalCategories / 2);
+                                for ($i = 0; $i < $halfCategories; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                for ($i = $halfCategories; $i < $totalCategories; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
                 </aside>
 
                 <!-- Tags Section -->
-                <aside class="tags-section">
+                <aside class="tags-section mt-3  white-border">
                     <h2>Tags</h2>
-                    <ul>
-                        <?php
-                        $tags = $wikiModel->getAllTags();
-                        foreach ($tags as $tag):
-                            echo '<li>' . htmlspecialchars($tag['name']) . '</li>';
-                        endforeach;
-                        ?>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                $tags = $wikiModel->getAllTags();
+                                $totalTags = count($tags);
+                                $halfTags = ceil($totalTags / 2);
+                                for ($i = 0; $i < $halfTags; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                for ($i = $halfTags; $i < $totalTags; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
                 </aside>
             </div>
         </div>
@@ -346,7 +374,7 @@ if ($wiki) {
 
     </div>
 
-    <script src="../../Assets/Wiki.js"></script>
+    <script src="../../Assets/js/Wiki.js"></script>
     <?php include '../../View/template/footer.php'; ?>
 </body>
 

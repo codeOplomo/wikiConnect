@@ -10,9 +10,6 @@ if (!isset($_SESSION['userId'])) {
 }
 
 $wikiModel = new WikiModel();
-$userWikis = $wikiModel->getWikisByUserId($_SESSION['userId']);
-
-$wikis = $wikiModel->getAllWikis();
 
 ?>
 
@@ -35,6 +32,7 @@ $wikis = $wikiModel->getAllWikis();
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </head>
 
 <body>
@@ -44,85 +42,83 @@ $wikis = $wikiModel->getAllWikis();
     <div class="container-fluid mx-auto mt-5">
 
         <div class="row">
-            <div class="col-8">
-                <h2 style="text-align: center;">Wiki Articles</h2>
-                <div class="row">
-                    <?php foreach ($wikis as $wiki): ?>
-                        <?php
-                        $categoryName = $wikiModel->getCategoryName($wiki->getCategoryId());
-                        $userName = $wikiModel->getUserName($wiki->getUserId());
-                        $tags = $wikiModel->getTagsForWiki($wiki->getId());
-                        $tagList = implode(', ', $tags);
-                        $imagePath = $wiki->getImage() ? '../../Assets/uploads/' . htmlspecialchars($wiki->getImage()) : null;
-                        ?>
-                        <div class="col-md-4 mb-4">
-                            <div class="card main-section">
-                                <?php if ($imagePath && file_exists($imagePath)): ?>
-                                    <img src="<?= $imagePath ?>" class="card-img-top" alt="Wiki Image">
-                                <?php else: ?>
-                                    <p class="text-center mt-2">No image or image not found.</p>
-                                <?php endif; ?>
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <?= htmlspecialchars($wiki->getTitle()) ?>
-                                    </h5>
-                                    <p class="card-text">
-                                        <?= htmlspecialchars($wiki->getContent()) ?>
-                                    </p>
-                                    <div class="wiki-meta">
-                                        <p>Posted by:
-                                            <?= $userName !== null ? htmlspecialchars($userName) : "Unknown" ?>
-                                        </p>
-                                        <p>Category:
-                                            <?= $categoryName !== null ? htmlspecialchars($categoryName) : "Uncategorized" ?>
-                                        </p>
-                                        <p>Tags:
-                                            <?= $tagList !== null ? htmlspecialchars($tagList) : "No Tags" ?>
-                                        </p>
-                                    </div>
-                                </div>
-                                <a href="wikiDetail.php?wikiId=<?= $wiki->getId() ?>" class="stretched-link"></a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-
-
-                </div>
+            <div id="userId" data-userid="<?= $_SESSION['userId'] ?>"></div>
+            <div class="col-12 col-md-8">
+                <h2 class="text-center">Wiki Articles</h2>
+                <div id="wikiContentContainer"></div>
             </div>
 
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-4 scndSection">
 
-                <div class="button-section">
-                    <button type="button" id="toggleButton" onclick="toggleWikisView()">View my wikis</button>
+                <div class="button-section mt-3 text-center">
+                    <button type="button" id="toggleButton" onclick="toggleWikisView(isUserOnlyView)"
+                        onmouseover="this.style.color='#ffcc00'; this.style.border='1px solid #703BF7';"
+                        onmouseout="this.style.color=''; this.style.border='';">View my
+                        wikis</button>
                     <button type="button" class="btn mainBtnColor" data-toggle="modal" data-target="#addWikiModal">Add a
                         wiki</button>
                 </div>
+
                 <!-- Categories Section -->
-                <aside class="categories-section">
-                    <h2>Categories</h2>
-                    <ul>
-                        <?php
-                        $categories = $wikiModel->getAllCategories();
-                        foreach ($categories as $category):
-                            echo '<li>' . htmlspecialchars($category['name']) . '</li>';
-                        endforeach;
-                        ?>
-                    </ul>
-                </aside>
+<aside class="categories-section mt-3 white-border">
+    <h2>Categories</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <ul class="list-group">
+                <?php
+                $categories = $wikiModel->getAllCategories();
+                $totalCategories = count($categories);
+                $halfCategories = ceil($totalCategories / 2);
+                for ($i = 0; $i < $halfCategories; $i++) {
+                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                }
+                ?>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <ul class="list-group">
+                <?php
+                for ($i = $halfCategories; $i < $totalCategories; $i++) {
+                    echo '<li class="list-group-item category-link" data-category-id="' . $categories[$i]['id'] . '">' . htmlspecialchars($categories[$i]['name']) . '</li>';
+                }
+                ?>
+            </ul>
+        </div>
+    </div>
+</aside>
+
+
+
 
                 <!-- Tags Section -->
-                <aside class="tags-section">
+                <aside class="tags-section mt-3  white-border">
                     <h2>Tags</h2>
-                    <ul>
-                        <?php
-                        $tags = $wikiModel->getAllTags();
-                        foreach ($tags as $tag):
-                            echo '<li>' . htmlspecialchars($tag['name']) . '</li>';
-                        endforeach;
-                        ?>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                $tags = $wikiModel->getAllTags();
+                                $totalTags = count($tags);
+                                $halfTags = ceil($totalTags / 2);
+                                for ($i = 0; $i < $halfTags; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <?php
+                                for ($i = $halfTags; $i < $totalTags; $i++) {
+                                    echo '<li class="list-group-item">' . htmlspecialchars($tags[$i]['name']) . '</li>';
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
                 </aside>
+
             </div>
         </div>
 
@@ -198,41 +194,8 @@ $wikis = $wikiModel->getAllWikis();
 
     </div>
 
-    <script>
-        function loadWikis(userOnly = false) {
-            // const url = userOnly ? '../../Api/wikis/user' : '/api/wikis/all';
-            const url = userOnly ? '../../Api/fetchUserWikis.php' : '../../Api/fetchAllWikis.php';
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const wikisSection = document.querySelector('.wiki-cards-section');
-                    wikisSection.innerHTML = '';
-                    data.forEach(wiki => {
-                        wikisSection.innerHTML += `
-                    <div class="wiki-card">
-                        <h3>${wiki.title}</h3>
-                        <p>${wiki.content}</p>
-                        <!-- Add other wiki details here -->
-                    </div>
-                `;
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
 
-        function toggleWikisView() {
-            const button = document.getElementById('toggleButton');
-            if (button.innerText === 'View my wikis') {
-                loadWikis(true);
-                button.innerText = 'View all wikis';
-            } else {
-                loadWikis(false);
-                button.innerText = 'View my wikis';
-            }
-        }
-
-    </script>
-    <script src="../../Assets/Wiki.js"></script>
+    <script src="../../Assets/js/Wiki.js"></script>
     <?php include '../../View/template/footer.php'; ?>
 </body>
 

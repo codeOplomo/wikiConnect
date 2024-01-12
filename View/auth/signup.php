@@ -30,7 +30,7 @@
             <img src="../../Assets/img/wikiHero.png" alt="Hero Image" class="w-full h-auto">
             <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center">
-                <h1 class="text-4xl font-bold" style=" line-height: 10vh; color: black; -webkit-text-stroke: 3px white; font-size: 4.5rem;">Discover a place you'll love to live</h1>
+                <h1 class="text-4xl font-bold" style="color: #703BF7; line-height: 10vh; -webkit-text-stroke: 2px white; font-size: 4.5rem;">Discover a place you'll love to live</h1>
                 </div>
             </div>
         </div>

@@ -39,6 +39,9 @@ CREATE TABLE `wikitags` (
   FOREIGN KEY (`tagId`) REFERENCES `tags`(`id`)
 );
 
+ALTER TABLE wikis
+ADD deletedAt DATETIME DEFAULT NULL;
+
 INSERT INTO `categories` (`name`) VALUES
 ('Art'),
 ('Culture'),

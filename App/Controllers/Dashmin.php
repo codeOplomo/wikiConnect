@@ -1,12 +1,14 @@
 <?php 
 use MyApp\Model\CategoryModel;
 use MyApp\Model\TagModel;
+use MyApp\Model\WikiModel;
 
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 $categoryModel = new CategoryModel();
 $tagModel = new TagModel();
+$wikiModel = new WikiModel();
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -108,6 +110,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "Invalid POST data for deleting tag.";
                 }
                 break;
+                case "archiveWiki":
+                    if (isset($_POST["wiki_id"])) {
+                        $wikiId = $_POST["wiki_id"];
+                
+                        $currentTimestamp = date("Y-m-d H:i:s");
+                
+                        $wikiArchived = $wikiModel->archiveWiki($wikiId, $currentTimestamp);
+                
+                        if ($wikiArchived) {
+                            header("Location: ../../View/admin/dashmin.php");
+                        } else {
+                            echo "Error archiving wiki!";
+                        }
+                    } else {
+                        echo "Invalid POST data for archiving wiki.";
+                    }
+                    break;
+                    case "unarchive-wiki":
+                        if (isset($_POST["wiki_id"])) {
+                            $wikiId = $_POST["wiki_id"];
+                    
+                            $wikiUnarchived = $wikiModel->unarchiveWiki($wikiId);
+                    
+                            if ($wikiUnarchived) {
+                                header("Location: ../../View/admin/dashmin.php");
+                            } else {
+                                echo "Error unarchiving wiki!";
+                            }
+                        } else {
+                            echo "Invalid POST data for unarchiving wiki.";
+                        }
+                        break;
+                    
+                
             
 
             default:

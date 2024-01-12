@@ -8,7 +8,7 @@ $wikiModel = new WikiModel();
 $categoryModel = new CategoryModel();
 $tagModel = new TagModel();
 
-$wikis = $wikiModel->getAllWikis();
+$wikis = $wikiModel->getAllWikisDash();
 $categories = $categoryModel->getAllCategories();
 $tags = $tagModel->getAllTags();
 ?>
@@ -54,7 +54,6 @@ $tags = $tagModel->getAllTags();
     <style>
         .content-cell {
             max-width: 300px;
-            /* Adjust the value as needed */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -163,7 +162,7 @@ $tags = $tagModel->getAllTags();
                     <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                         <a href="#" class="dropdown-item">My Profile</a>
                         <a href="#" class="dropdown-item">Settings</a>
-                        <a href="#" class="dropdown-item">Log Out</a>
+                        <a href="../../App/Controllers/Logout.php" class="dropdown-item">Log Out</a>
                     </div>
                 </div>
             </div>
@@ -275,22 +274,22 @@ $tags = $tagModel->getAllTags();
                             <?php
                             if ($wikis) {
                                 foreach ($wikis as $wiki) {
-                                    $tags = $wikiModel->getTagsForWiki($wiki->getId()); // Get tags for the current wiki
+                                    $tags = $wikiModel->getTagsForWiki($wiki['id']);
                                     $tagList = implode(', ', $tags);
                                     ?>
                                     <!-- Sample Row -->
                                     <tr>
                                         <td>
-                                            <?php echo $wiki->getId() ?>
+                                            <?php echo $wiki['id'] ?>
                                         </td>
                                         <td>
-                                            <?php echo $wiki->getTitle() ?>
+                                            <?php echo $wiki['title'] ?>
                                         </td>
                                         <td class="content-cell">
-                                            <?php echo $wiki->getContent() ?>
+                                            <?php echo $wiki['content'] ?>
                                         </td>
                                         <td>
-                                            <?php echo $wikiModel->getCategoryName($wiki->getCategoryId()) ?>
+                                            <?php echo $wikiModel->getCategoryName($wiki['categoryId']) ?>
                                         </td>
 
                                         <td class="tag-cell" data-tags="<?= htmlspecialchars($tagList) ?>">
@@ -299,19 +298,31 @@ $tags = $tagModel->getAllTags();
                                             ?>
                                         </td>
                                         <td>
-                                            <?php echo $wikiModel->getUserName($wiki->getUserId()) ?>
+                                            <?php echo $wikiModel->getUserName($wiki['userId']) ?>
                                         </td>
                                         <!-- Archive Column -->
                                         <td>
-                                            <button class="btn btn-sm btn-warning" data-toggle="modal"
-                                                data-target="#archiveWikiModal_<?php echo $wiki->getId(); ?>">
-                                                Archive
-                                            </button>
+                                            <?php
+                                            if ($wiki['deletedAt'] !== null) {
+                                                ?>
+                                                <button class="btn btn-sm btn-success" data-toggle="modal"
+                                                    data-target="#unarchiveWikiModal_<?php echo $wiki['id']; ?>">
+                                                    Unarchive
+                                                </button>
+                                                <?php
+                                            } else {
+                                                ?>
+                                                <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                                    data-target="#archiveWikiModal_<?php echo $wiki['id']; ?>">
+                                                    Archive
+                                                </button>
+                                                <?php
+                                            }
+                                            ?>
                                         </td>
-                                        <td data-category-id="<?= $wiki->getCategoryId() ?>"></td>
+                                        <td data-category-id="<?= $wiki['categoryId'] ?>"></td>
                                     </tr>
-                                    <!-- Archive Wiki Modal -->
-                                    <div class="modal fade" id="archiveWikiModal_<?php echo $wiki->getId(); ?>" tabindex="-1"
+                                    <div class="modal fade" id="archiveWikiModal_<?php echo $wiki['id']; ?>" tabindex="-1"
                                         role="dialog" aria-labelledby="archiveWikiModalTitle" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered" role="document">
                                             <div class="modal-content">
@@ -327,9 +338,9 @@ $tags = $tagModel->getAllTags();
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
                                                         data-dismiss="modal">Cancel</button>
-                                                    <form action="archive-wiki.php" method="post">
-                                                        <input type="hidden" name="wiki_id"
-                                                            value="<?php echo $wiki->getId(); ?>">
+                                                    <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                        <input type="hidden" name="wiki_id" value="<?php echo $wiki['id']; ?>">
+                                                        <input type="hidden" name="action" value="archiveWiki">
                                                         <button type="submit" name="archive-wiki"
                                                             class="btn btn-primary">Archive</button>
                                                     </form>
@@ -337,10 +348,39 @@ $tags = $tagModel->getAllTags();
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Unarchive Wiki Modal -->
+                                    <div class="modal fade" id="unarchiveWikiModal_<?php echo $wiki['id']; ?>" tabindex="-1"
+                                        role="dialog" aria-labelledby="unarchiveWikiModalTitle" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="unarchiveWikiModalTitle">Unarchive Wiki</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to unarchive this Wiki?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Cancel</button>
+                                                    <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                        <input type="hidden" name="wiki_id" value="<?php echo $wiki['id']; ?>">
+                                                        <input type="hidden" name="action" value="unarchive-wiki">
+                                                        <button type="submit" name="unarchive-wiki"
+                                                            class="btn btn-primary">Unarchive</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <?php
                                 }
                             }
                             ?>
+
                         </tbody>
                     </table>
                 </div>
@@ -397,7 +437,7 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <!-- Add your edit category form here -->
+                                                
                                                 <form action="../../App/Controllers/Dashmin.php" method="post">
                                                     <input type="hidden" name="action" value="updateCategory">
                                                     <div class="form-group">
@@ -430,7 +470,7 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <!-- Add your delete category confirmation message here -->
+                                                
                                                 <p>Are you sure you want to delete the category: <strong>
                                                         <?php echo htmlspecialchars($category['name']); ?>
                                                     </strong>?</p>
@@ -479,7 +519,6 @@ $tags = $tagModel->getAllTags();
                 <div class="h-100 bg-light rounded p-4">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h6 class="mb-0">Tag List</h6>
-                        <!-- <a href="">Display All</a> -->
                         <button id="add-tag-button" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add
                             Tag</button>
                     </div>
@@ -523,7 +562,6 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <!-- Add your edit tag form here -->
                                                 <form action="../../App/Controllers/Dashmin.php" method="post">
                                                     <div class="form-group">
                                                         <label for="editTagName">Tag Name</label>
@@ -553,7 +591,6 @@ $tags = $tagModel->getAllTags();
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <!-- Add your delete tag confirmation message here -->
                                                 <p>Are you sure you want to delete the tag: <strong>
                                                         <?php echo htmlspecialchars($tag['name']); ?>
                                                     </strong>?</p>
@@ -662,35 +699,35 @@ $tags = $tagModel->getAllTags();
 
 
             function filterTable() {
-    var selectedCategory = document.getElementById('categoryFilter').value;
-    var selectedTag = document.getElementById('tagFilter').value;
-    var rows = document.querySelectorAll('.table tbody tr');
+                var selectedCategory = document.getElementById('categoryFilter').value;
+                var selectedTag = document.getElementById('tagFilter').value;
+                var rows = document.querySelectorAll('.table tbody tr');
 
-    rows.forEach(function (row) {
-        if (shouldDisplayRow(row, selectedCategory, selectedTag)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
+                rows.forEach(function (row) {
+                    if (shouldDisplayRow(row, selectedCategory, selectedTag)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
 
-function shouldDisplayRow(row, selectedCategory, selectedTag) {
-    var categoryCell = row.querySelector('td[data-category-id]');
-    var categoryId = categoryCell.getAttribute('data-category-id');
+            function shouldDisplayRow(row, selectedCategory, selectedTag) {
+                var categoryCell = row.querySelector('td[data-category-id]');
+                var categoryId = categoryCell.getAttribute('data-category-id');
 
-    var tagCell = row.querySelector('.tag-cell');
-    var tags = tagCell.getAttribute('data-tags').split(', '); // Split the tags string into an array
+                var tagCell = row.querySelector('.tag-cell');
+                var tags = tagCell.getAttribute('data-tags').split(', '); // Split the tags string into an array
 
-    var categoryMatch = selectedCategory === 'all' || selectedCategory === categoryId;
-    var tagMatch = selectedTag === 'all' || tags.includes(selectedTag);
+                var categoryMatch = selectedCategory === 'all' || selectedCategory === categoryId;
+                var tagMatch = selectedTag === 'all' || tags.includes(selectedTag);
 
-    return categoryMatch && tagMatch;
-}
+                return categoryMatch && tagMatch;
+            }
 
-// Add event listeners to the category and tag filters
-document.getElementById('categoryFilter').addEventListener('change', filterTable);
-document.getElementById('tagFilter').addEventListener('change', filterTable);
+            // Add event listeners to the category and tag filters
+            document.getElementById('categoryFilter').addEventListener('change', filterTable);
+            document.getElementById('tagFilter').addEventListener('change', filterTable);
 
 
         </script>

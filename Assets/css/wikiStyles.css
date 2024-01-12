@@ -4,6 +4,36 @@
     color: white;
     background-color: #141414;
   }
+  .categories-section,
+  .tags-section {
+      color: white;
+      background-color: #141414;
+      padding: 15px; /* Adjust padding as needed */
+      border-radius: 5px; /* Add rounded corners */
+      margin-top: 10px; /* Add margin for separation */
+  }
+
+  .list-group-item {
+      background-color: transparent; /* Remove default list item background color */
+      border: none; /* Remove list item borders */
+  }
+  /* Custom CSS for white border */
+.white-border {
+    border: 1px solid white; /* Add a white border */
+    background-color: #141414; /* Background color */
+    color: white; /* Text color */
+}
+/* Change text color on hover */
+.tags-section li:hover,
+.categories-section li:hover,
+.toggle-button:hover {
+    color: #ffcc00;
+    border: 1px solid #703BF7; /* Change the text color to your desired color */
+    cursor: pointer; /* Change cursor to pointer to indicate interactivity */
+}
+
+
+
 .main-section{
     color: #141414;
     background-color: #c3c2c2;
@@ -34,9 +64,6 @@
     border-color: #ced4da;
 }
 
-.wiki-card:hover {
-    cursor: pointer;
-}
 
 
 .wiki-image {
@@ -52,8 +79,6 @@
     .container {
         flex-direction: column;
     }
-    .wiki-card {
-        flex-basis: 100%; /* Each card takes full width on smaller screens */
-    }
+    
 }
 
