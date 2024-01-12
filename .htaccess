@@ -1,0 +1,8 @@
+
+<!-- <IfModule mod_rewrite.c>
+    RewriteEngine On
+    # DirectoryIndex main.php
+    
+    # Rewrite everything else
+    RewriteRule ^ main.php [QSA,L]
+</IfModule> -->
