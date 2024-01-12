@@ -6,14 +6,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estatein - Login</title>
+    <title>WikiConnect - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="../../Assets/css/authstyle.css" rel="stylesheet">
 </head>
 
 <body class="custom-bg text-gray-400">
-<?php include '../../View/templates/header.php'; ?>
+<?php include '../../View/template/header.php'; ?>
 
 <div class="custom-bg rounded shadow-lg p-6 mt-12 md:flex md:items-center relative">
     <div class="centred md:w-1/2 relative">
@@ -60,7 +60,7 @@
     </div>
 </div>
 
-<?php include '../../View/templates/footer.php'; ?>
+<?php include '../../View/template/footer.php'; ?>
 <script src="../../Assets/js/myscript.js"></script>
 </body>
 </html>

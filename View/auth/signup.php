@@ -24,7 +24,7 @@
 </style>
 
 <body class="custom-bg text-gray-400">
-    <?php include '../../View/templates/header.php'; ?>
+    <?php include '../../View/template/header.php'; ?>
     <div class="centred custom-bg rounded shadow-lg p-6 mt-12 md:flex md:items-center relative">
         <div class="md:w-1/2 relative">
             <img src="../../Assets/img/wikiHero.png" alt="Hero Image" class="w-full h-auto">
@@ -75,7 +75,7 @@
     </div>
 
 
-    <?php include '../../View/templates/footer.php'; ?>
+    <?php include '../../View/template/footer.php'; ?>
     <script src="Assets/js/myscript.js"></script>
     <script>
         function setRole(role) {

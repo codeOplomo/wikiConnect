@@ -160,6 +160,22 @@ class WikiModel {
             // Handle the exception
         }
     }
+
+    public function getAllWikisWithTags() {
+        $sql = "SELECT w.*, GROUP_CONCAT(t.name) AS tags
+                FROM wikis w
+                LEFT JOIN wikitags wt ON w.id = wt.wikiId
+                LEFT JOIN tags t ON wt.tagId = t.id
+                GROUP BY w.id";
+
+        $result = $this->db->query($sql);
+
+        if ($result) {
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return false;
+        }
+    }
     
     
     public function saveWiki(WikiEntity $wiki) {

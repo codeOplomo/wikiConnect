@@ -1,11 +1,16 @@
 <?php
 require_once '../../vendor/autoload.php';
 use MyApp\Model\WikiModel;
+use MyApp\Model\CategoryModel;
+use MyApp\Model\TagModel;
 
- $wikiModel = new WikiModel();
- $wikis = $wikiModel->getAllWikis();
- $categories = $wikiModel->getAllCategories();
- $tags = $wikiModel->getAllTags();
+$wikiModel = new WikiModel();
+$categoryModel = new CategoryModel();
+$tagModel = new TagModel();
+
+$wikis = $wikiModel->getAllWikis();
+$categories = $categoryModel->getAllCategories();
+$tags = $tagModel->getAllTags();
 ?>
 
 <!DOCTYPE html>
@@ -211,29 +216,67 @@ use MyApp\Model\WikiModel;
                 <div class="h-100 bg-light rounded p-4">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h6 class="mb-0">List of Wikis</h6>
+                        <div class="form-group">
+                            <h6><label for="categoryFilter">Filter by Category:</label></h6>
+                            <select class="form-control" id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                <?php
+                                $categories = $wikiModel->getAllCategories();
+                                foreach ($categories as $category):
+                                    ?>
+                                    <option value="<?= htmlspecialchars($category['id']) ?>">
+                                        <?= htmlspecialchars($category['name']) ?>
+                                    </option>
+                                    <?php
+                                endforeach;
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <h6><label for="tagFilter">Filter by Tag:</label></h6>
+                            <select class="form-control" id="tagFilter">
+                                <option value="all">All Tags</option>
+                                <?php
+                                $tags = $wikiModel->getAllTags(); // Get all available tags
+                                foreach ($tags as $tag):
+                                    ?>
+                                    <option value="<?= htmlspecialchars($tag['id']) ?>">
+                                        <?= htmlspecialchars($tag['name']) ?>
+                                    </option>
+                                    <?php
+                                endforeach;
+                                ?>
+                            </select>
+                        </div>
+
                     </div>
 
                     <table class="table table-hover">
                         <colgroup>
                             <col style="width: 5%;">
-                            <col style="width: 20%;"> 
-                            <col style="width: 40%;"> 
-                            <col style="width: 15%;"> 
-                            <col style="width: 10%;"> 
+                            <col style="width: 20%;">
+                            <col style="width: 30%;">
+                            <col style="width: 10%;">
+                            <col style="width: 15%;">
+                            <col style="width: 10%;">
                         </colgroup>
                         <thead>
                             <tr>
                                 <th scope="col">#ID</th>
                                 <th scope="col">Wiki Title</th>
                                 <th scope="col">Content</th>
+                                <th scope="col">Category</th>
                                 <th scope="col">Author</th>
                                 <th scope="col">Archive</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             if ($wikis) {
                                 foreach ($wikis as $wiki) {
+                                    $tags = $wikiModel->getTagsForWiki($wiki->getId()); // Get tags for the current wiki
+                                    $tagList = implode(', ', $tags);
                                     ?>
                                     <!-- Sample Row -->
                                     <tr>
@@ -247,6 +290,15 @@ use MyApp\Model\WikiModel;
                                             <?php echo $wiki->getContent() ?>
                                         </td>
                                         <td>
+                                            <?php echo $wikiModel->getCategoryName($wiki->getCategoryId()) ?>
+                                        </td>
+
+                                        <td class="tag-cell" data-tags="<?= htmlspecialchars($tagList) ?>">
+                                            <?php
+                                            echo htmlspecialchars($tagList);
+                                            ?>
+                                        </td>
+                                        <td>
                                             <?php echo $wikiModel->getUserName($wiki->getUserId()) ?>
                                         </td>
                                         <!-- Archive Column -->
@@ -256,6 +308,7 @@ use MyApp\Model\WikiModel;
                                                 Archive
                                             </button>
                                         </td>
+                                        <td data-category-id="<?= $wiki->getCategoryId() ?>"></td>
                                     </tr>
                                     <!-- Archive Wiki Modal -->
                                     <div class="modal fade" id="archiveWikiModal_<?php echo $wiki->getId(); ?>" tabindex="-1"
@@ -296,144 +349,250 @@ use MyApp\Model\WikiModel;
 
 
         <div class="container-fluid pt-4 px-4" id="categories-section">
-    <div class="container-fluid pt-4 px-4">
-        <div class="h-100 bg-light rounded p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <h6 class="mb-0">Category List</h6>
-                <!-- <a href="">Display All</a> -->
-                <button id="add-category" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add Category</button>
+            <div class="container-fluid pt-4 px-4">
+                <div class="h-100 bg-light rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h6 class="mb-0">Category List</h6>
+                        <!-- <a href="">Display All</a> -->
+                        <button id="add-category-button" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add
+                            Category</button>
+                    </div>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#ID</th>
+                                <th scope="col">Category Name</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($categories as $category) { ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $category['id']; ?>
+                                    </td>
+                                    <td>
+                                        <?php echo htmlspecialchars($category['name']); ?>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                            data-target="#editCategoryModal_<?php echo $category['id']; ?>">Edit</button>
+                                        <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                            data-target="#deleteCategoryModal_<?php echo $category['id']; ?>">Delete</button>
+                                    </td>
+                                </tr>
+                                <!-- Edit Category Modal -->
+                                <div class="modal fade" id="editCategoryModal_<?php echo $category['id']; ?>" tabindex="-1"
+                                    role="dialog" aria-labelledby="editCategoryModalTitle_<?php echo $category['id']; ?>"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
+                                                    id="editCategoryModalTitle_<?php echo $category['id']; ?>">Edit Category
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Add your edit category form here -->
+                                                <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                    <input type="hidden" name="action" value="updateCategory">
+                                                    <div class="form-group">
+                                                        <label for="editCategoryName">Category Name</label>
+                                                        <input type="text" class="form-control" id="editCategoryName"
+                                                            name="editCategoryName"
+                                                            value="<?php echo htmlspecialchars($category['name']); ?>">
+                                                    </div>
+                                                    <input type="hidden" name="categoryId"
+                                                        value="<?php echo $category['id']; ?>">
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Delete Category Modal -->
+                                <div class="modal fade" id="deleteCategoryModal_<?php echo $category['id']; ?>"
+                                    tabindex="-1" role="dialog"
+                                    aria-labelledby="deleteCategoryModalTitle_<?php echo $category['id']; ?>"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
+                                                    id="deleteCategoryModalTitle_<?php echo $category['id']; ?>">Confirm
+                                                    Delete</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Add your delete category confirmation message here -->
+                                                <p>Are you sure you want to delete the category: <strong>
+                                                        <?php echo htmlspecialchars($category['name']); ?>
+                                                    </strong>?</p>
+                                                <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                    <input type="hidden" name="action" value="deleteCategory">
+                                                    <input type="hidden" name="categoryId"
+                                                        value="<?php echo $category['id']; ?>">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <?php } ?>
+                        </tbody>
+                    </table>
+
+
+
+                    <div id="add-category-form" style="display: none;">
+                        <form action="../../App/Controllers/Dashmin.php" method="post">
+                            <input type="hidden" name="action" value="addCategory">
+                            <tr class="form-section container-fluid">
+                                <td>
+                                    <input type="text" class="form-control" name="category" id="categoryInput"
+                                        placeholder="Enter category name">
+                                    <label class="labell" for="categoryInput"></label>
+                                </td>
+                                <td><button type="submit" name="submit" class="btn btn-sm btn-success">
+                                        Add <i class="fa fa-plus"></i>
+                                    </button></td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary"
+                                        id="close-category-form">Close</button>
+                                </td>
+                            </tr>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">Category Name</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($categories as $category) { ?>
-                        <tr>
-                            <td><?php echo $category['id']; ?></td>
-                            <td><?php echo htmlspecialchars($category['name']); ?></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning" data-toggle="modal"
-                                    data-target="#editCategoryModal_<?php echo $category['id']; ?>">Edit</button>
-                                <button class="btn btn-sm btn-danger" data-toggle="modal"
-                                    data-target="#deleteCategoryModal_<?php echo $category['id']; ?>">Delete</button>
-                            </td>
-                        </tr>
-                        <!-- Edit Category Modal -->
-                        <div class="modal fade" id="editCategoryModal_<?php echo $category['id']; ?>" tabindex="-1" role="dialog"
-                            aria-labelledby="editCategoryModalTitle_<?php echo $category['id']; ?>" aria-hidden="true">
-                            <!-- Modal content for editing category -->
-                            <!-- Add your edit category form here -->
-                        </div>
-                        <!-- Delete Category Modal -->
-                        <div class="modal fade" id="deleteCategoryModal_<?php echo $category['id']; ?>" tabindex="-1"
-                            role="dialog" aria-labelledby="deleteCategoryModalTitle_<?php echo $category['id']; ?>"
-                            aria-hidden="true">
-                            <!-- Modal content for deleting category -->
-                            <!-- Add your delete category confirmation here -->
-                        </div>
-                    <?php } ?>
-                </tbody>
-            </table>
-
-            <form action="../controller/produit/insert-data.php" method="post">
-                <tr class="form-section container-fluid">
-                    <td><button type="submit" name="submit" class="btn btn-sm btn-success">
-                            Add <i class="fa fa-plus"></i>
-                        </button></td>
-                    <td>
-                        <input type="text" class="form-control" name="article" id="articleInput"
-                            placeholder="Enter category name">
-                        <label class="labell" for="articleInput"></label>
-                    </td>
-                    <td>
-                        <!-- Your other form fields here -->
-                    </td>
-                    <td>
-                        <!-- Your other form fields here -->
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </form>
         </div>
-    </div>
-</div>
 
-<div class="container-fluid pt-4 px-4" id="tags-section">
-    <div class="container-fluid pt-4 px-4">
-        <div class="h-100 bg-light rounded p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <h6 class="mb-0">Tag List</h6>
-                <!-- <a href="">Display All</a> -->
-                <button id="add-tag" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add Tag</button>
+        <div class="container-fluid pt-4 px-4" id="tags-section">
+            <div class="container-fluid pt-4 px-4">
+                <div class="h-100 bg-light rounded p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h6 class="mb-0">Tag List</h6>
+                        <!-- <a href="">Display All</a> -->
+                        <button id="add-tag-button" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add
+                            Tag</button>
+                    </div>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#ID</th>
+                                <th scope="col">Tag Name</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $tags = $tagModel->getAllTags(); ?>
+                            <?php foreach ($tags as $tag) { ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $tag['id']; ?>
+                                    </td>
+                                    <td>
+                                        <?php echo htmlspecialchars($tag['name']); ?>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                            data-target="#editTagModal_<?php echo $tag['id']; ?>">Edit</button>
+                                        <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                            data-target="#deleteTagModal_<?php echo $tag['id']; ?>">Delete</button>
+                                    </td>
+                                </tr>
+                                <!-- Edit Tag Modal -->
+                                <div class="modal fade" id="editTagModal_<?php echo $tag['id']; ?>" tabindex="-1"
+                                    role="dialog" aria-labelledby="editTagModalTitle_<?php echo $tag['id']; ?>"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editTagModalTitle_<?php echo $tag['id']; ?>">
+                                                    Edit Tag</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Add your edit tag form here -->
+                                                <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                    <div class="form-group">
+                                                        <label for="editTagName">Tag Name</label>
+                                                        <input type="text" class="form-control" id="editTagName"
+                                                            name="editTagName"
+                                                            value="<?php echo htmlspecialchars($tag['name']); ?>">
+                                                    </div>
+                                                    <input type="hidden" name="tagId" value="<?php echo $tag['id']; ?>">
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delete Tag Modal -->
+                                <div class="modal fade" id="deleteTagModal_<?php echo $tag['id']; ?>" tabindex="-1"
+                                    role="dialog" aria-labelledby="deleteTagModalTitle_<?php echo $tag['id']; ?>"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteTagModalTitle_<?php echo $tag['id']; ?>">
+                                                    Confirm Delete</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Add your delete tag confirmation message here -->
+                                                <p>Are you sure you want to delete the tag: <strong>
+                                                        <?php echo htmlspecialchars($tag['name']); ?>
+                                                    </strong>?</p>
+                                                <form action="../../App/Controllers/Dashmin.php" method="post">
+                                                    <input type="hidden" name="tagId" value="<?php echo $tag['id']; ?>">
+                                                    <input type="hidden" name="action" value="deleteTag">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <?php } ?>
+                        </tbody>
+                    </table>
+
+                    <div id="add-tag-form" style="display: none;">
+                        <form action="../../App/Controllers/Dashmin.php" method="post">
+                            <tr class="form-section container-fluid">
+                                <td>
+                                    <input type="text" class="form-control" name="tag" id="tagInput"
+                                        placeholder="Enter tag name">
+                                    <label class="labell" for="tagInput"></label>
+                                </td>
+                                <td>
+                                    <button type="submit" name="submit" class="btn btn-sm btn-success">
+                                        Add <i class="fa fa-plus"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary" id="close-tag-form">Close</button>
+                                </td>
+                            </tr>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">Tag Name</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($tags as $tag) { ?>
-                        <tr>
-                            <td><?php echo $tag['id']; ?></td>
-                            <td><?php echo htmlspecialchars($tag['name']); ?></td>
-                            <td>
-                                <button class="btn btn-sm btn-warning" data-toggle="modal"
-                                    data-target="#editTagModal_<?php echo $tag['id']; ?>">Edit</button>
-                                <button class="btn btn-sm btn-danger" data-toggle="modal"
-                                    data-target="#deleteTagModal_<?php echo $tag['id']; ?>">Delete</button>
-                            </td>
-                        </tr>
-                        <!-- Edit Tag Modal -->
-                        <div class="modal fade" id="editTagModal_<?php echo $tag['id']; ?>" tabindex="-1" role="dialog"
-                            aria-labelledby="editTagModalTitle_<?php echo $tag['id']; ?>" aria-hidden="true">
-                            <!-- Modal content for editing tag -->
-                            <!-- Add your edit tag form here -->
-                        </div>
-                        <!-- Delete Tag Modal -->
-                        <div class="modal fade" id="deleteTagModal_<?php echo $tag['id']; ?>" tabindex="-1"
-                            role="dialog" aria-labelledby="deleteTagModalTitle_<?php echo $tag['id']; ?>"
-                            aria-hidden="true">
-                            <!-- Modal content for deleting tag -->
-                            <!-- Add your delete tag confirmation here -->
-                        </div>
-                    <?php } ?>
-                </tbody>
-            </table>
-
-            <form action="../controller/produit/insert-data.php" method="post">
-                <tr class="form-section container-fluid">
-                    <td><button type="submit" name="submit" class="btn btn-sm btn-success">
-                            Add <i class="fa fa-plus"></i>
-                        </button></td>
-                    <td>
-                        <input type="text" class="form-control" name="tag" id="tagInput"
-                            placeholder="Enter tag name">
-                        <label class="labell" for="tagInput"></label>
-                    </td>
-                    <td>
-                        <!-- Your other form fields here -->
-                    </td>
-                    <td>
-                        <!-- Your other form fields here -->
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </form>
         </div>
-    </div>
-</div>
 
 
 
@@ -458,32 +617,6 @@ use MyApp\Model\WikiModel;
             </div>
         </div>
 
-        <div class="float-right col-sm-12 col-md-6 col-xl-6 mt-4">
-            <div class="h-100 bg-light rounded p-4">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Nom de produit</th>
-                            <th scope="col">Profit</th>
-                            <th scope="col">Marge</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Short task goes here...</td>
-                            <td><input class="form-check-input m-0" type="checkbox"></td>
-                            <td><input class="form-check-input m-0" type="checkbox"></td>
-                        </tr>
-
-                    </tbody>
-                </table>
-
-                <!-- Back to Top -->
-                <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-            </div>
-
-        </div>
-
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -496,6 +629,71 @@ use MyApp\Model\WikiModel;
         <script src="../../Assets/js/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
         <script src="../../Assets/js/dashboard.js"></script>
 
+
+        <script>
+            document.getElementById('add-category-button').addEventListener('click', function () {
+                var addCategoryForm = document.getElementById('add-category-form');
+                if (addCategoryForm.style.display === 'none' || addCategoryForm.style.display === '') {
+                    addCategoryForm.style.display = 'block';
+                } else {
+                    addCategoryForm.style.display = 'none';
+                }
+            });
+
+            document.getElementById('close-category-form').addEventListener('click', function () {
+                var addCategoryForm = document.getElementById('add-category-form');
+                addCategoryForm.style.display = 'none';
+            });
+
+            document.getElementById('add-tag-button').addEventListener('click', function () {
+                var addTagForm = document.getElementById('add-tag-form');
+                if (addTagForm.style.display === 'none' || addTagForm.style.display === '') {
+                    addTagForm.style.display = 'block';
+                } else {
+                    addTagForm.style.display = 'none';
+                }
+            });
+
+            document.getElementById('close-tag-form').addEventListener('click', function () {
+                var addTagForm = document.getElementById('add-tag-form');
+                addTagForm.style.display = 'none';
+            });
+
+
+
+            function filterTable() {
+    var selectedCategory = document.getElementById('categoryFilter').value;
+    var selectedTag = document.getElementById('tagFilter').value;
+    var rows = document.querySelectorAll('.table tbody tr');
+
+    rows.forEach(function (row) {
+        if (shouldDisplayRow(row, selectedCategory, selectedTag)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function shouldDisplayRow(row, selectedCategory, selectedTag) {
+    var categoryCell = row.querySelector('td[data-category-id]');
+    var categoryId = categoryCell.getAttribute('data-category-id');
+
+    var tagCell = row.querySelector('.tag-cell');
+    var tags = tagCell.getAttribute('data-tags').split(', '); // Split the tags string into an array
+
+    var categoryMatch = selectedCategory === 'all' || selectedCategory === categoryId;
+    var tagMatch = selectedTag === 'all' || tags.includes(selectedTag);
+
+    return categoryMatch && tagMatch;
+}
+
+// Add event listeners to the category and tag filters
+document.getElementById('categoryFilter').addEventListener('change', filterTable);
+document.getElementById('tagFilter').addEventListener('change', filterTable);
+
+
+        </script>
 </body>
 
 </html>
