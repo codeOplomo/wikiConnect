@@ -34,4 +34,3 @@ if (isset($_GET['tag'])) {
 } else {
     echo 'Tag not specified';
 }
-?>

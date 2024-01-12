@@ -8,28 +8,28 @@
   .tags-section {
       color: white;
       background-color: #141414;
-      padding: 15px; /* Adjust padding as needed */
-      border-radius: 5px; /* Add rounded corners */
-      margin-top: 10px; /* Add margin for separation */
+      padding: 15px; 
+      border-radius: 5px; 
+      margin-top: 10px; 
   }
 
   .list-group-item {
-      background-color: transparent; /* Remove default list item background color */
-      border: none; /* Remove list item borders */
+      background-color: transparent;
+      border: none;
   }
-  /* Custom CSS for white border */
+  
 .white-border {
-    border: 1px solid white; /* Add a white border */
-    background-color: #141414; /* Background color */
-    color: white; /* Text color */
+    border: 1px solid white; 
+    background-color: #141414; 
+    color: white; 
 }
-/* Change text color on hover */
+
 .tags-section li:hover,
 .categories-section li:hover,
 .toggle-button:hover {
     color: #ffcc00;
-    border: 1px solid #703BF7; /* Change the text color to your desired color */
-    cursor: pointer; /* Change cursor to pointer to indicate interactivity */
+    border: 1px solid #703BF7; 
+    cursor: pointer; 
 }
 
 
@@ -67,14 +67,13 @@
 
 
 .wiki-image {
-    width: 150px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
+    width: 150px; 
+    height: 100px; 
     margin-right: 10px;
     border-radius: 5px;
-    object-fit: cover; /* Ensures the image covers the area without distortion */
+    object-fit: cover; 
 }
 
-/* Responsive design - adjust as necessary */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;

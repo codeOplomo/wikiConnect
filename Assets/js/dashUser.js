@@ -1,14 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Get the profile link and the profile section
     var profileLink = document.querySelector("#profileLink");
     var profileSection = document.getElementById("profile-section");
 
-    // Add a click event listener to the profile link
     profileLink.addEventListener("click", function (event) {
-        // Prevent the default behavior of the link
         event.preventDefault();
 
-        // Toggle the visibility of the profile section
         profileSection.classList.toggle("d-none");
     });
 });
@@ -26,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var profileSection = document.getElementById("profile-section");
 
     closeIcon.addEventListener("click", function () {
-        // Hide the profile section
         profileSection.classList.add("d-none");
     });
 });

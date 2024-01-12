@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 document.getElementById('uncheckedWikiTags').appendChild(checkboxDiv);
             }
-            filterWikis(); // Apply filters when tags change
+            filterWikis(); 
         });
     });
 
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showMyWikisButton.addEventListener('click', function () {
         isUserOnlyView = !isUserOnlyView;
-        filterWikis(); // Apply filters when the "View my wikis" button is clicked
+        filterWikis(); 
     });
 
     function loadContent(categoryId = null, additionalUserId = null) {
@@ -53,12 +53,11 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 console.log('Received Data:', data);
                 allWikis = data;
-                filterWikis(); // Apply filters after loading the content
+                filterWikis();
             })
             .catch(error => console.error('Error:', error));
     }
 
-    // Initially load all wikis
     loadContent();
 
     function createWikiCard(wiki) {
@@ -113,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.log('Selected Category ID:', selectedCategoryId);
 
-            filterWikis(); // Apply filters when a category is selected
+            filterWikis(); 
         });
     });
 
@@ -157,10 +156,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     
         if (selectedTag !== null) {
-            // Split the tagsList into an array
             const selectedTagArray = selectedTag.split(', ');
     
-            // Filter wikis that contain the selected tag
             filteredWikis = filteredWikis.filter(wiki => {
                 const wikiTags = wiki.tagsList.split(', ');
                 return wikiTags.some(tag => selectedTagArray.includes(tag));

@@ -14,10 +14,8 @@ class CategoryModel {
     }
 
     public function categoryExists($categoryName) {
-        // Convert the entered category name to lowercase
         $categoryNameLower = strtolower($categoryName);
 
-        // Check if the category name (lowercase) already exists
         $checkQuery = "SELECT COUNT(*) FROM categories WHERE LOWER(name) = :categoryNameLower";
         $checkStmt = $this->db->prepare($checkQuery);
         $checkStmt->bindParam(':categoryNameLower', $categoryNameLower, PDO::PARAM_STR);
@@ -28,7 +26,6 @@ class CategoryModel {
 
     public function deleteCategory($categoryId) {
         try {
-            // Perform the deletion
             $deleteQuery = "DELETE FROM categories WHERE id = :categoryId";
             $deleteStmt = $this->db->prepare($deleteQuery);
             $deleteStmt->bindParam(':categoryId', $categoryId, PDO::PARAM_INT);
@@ -44,10 +41,8 @@ class CategoryModel {
     public function updateCategory($categoryId, $newCategoryName) {
         try {
             if ($this->categoryExists($newCategoryName)) {
-                // New category name already exists
                 return false;
             } else {
-                // Update the category name with the new one
                 $updateQuery = "UPDATE categories SET name = :newCategoryName WHERE id = :categoryId";
                 $updateStmt = $this->db->prepare($updateQuery);
                 $updateStmt->bindParam(':newCategoryName', $newCategoryName, PDO::PARAM_STR);
@@ -65,10 +60,8 @@ class CategoryModel {
     public function addCategory($categoryName) {
         try {
             if ($this->categoryExists($categoryName)) {
-                // Category already exists
                 return false;
             } else {
-                // Insert the category name as entered by the user
                 $insertQuery = "INSERT INTO categories (name) VALUES (:categoryName)";
                 $insertStmt = $this->db->prepare($insertQuery);
                 $insertStmt->bindParam(':categoryName', $categoryName, PDO::PARAM_STR);

@@ -34,6 +34,6 @@ if (isset($_GET['categoryId'])) {
 } else {
     echo 'Category ID not specified';
 }
-?>
+
 
 
